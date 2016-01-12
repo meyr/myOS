@@ -130,7 +130,7 @@ void toggleLED(char cmd)
 void initSysTick(void)
 {
 	/* select clock source to AHB/8 */
-	SysTick->CTRL |= 0x00000004;
+	SysTick->CTRL &= 0xfffffffb;
 
 	/* enable assert SysTick exception request if count down to zero */
 	SysTick->CTRL |= 0x00000002;

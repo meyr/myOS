@@ -1,5 +1,6 @@
 #include "reg.h"
 
+extern int printf(const char *format, ...);
 __IO uint32_t uwTick;
 
 void SystemInit(void)
@@ -72,15 +73,6 @@ void SystemInit(void)
  	//RCC->CFGR &= 0xF8FFFFFF;
  	//RCC->CFGR |= 0x04000000;
 
-}
-
-void print_str(const char *str)
-{
-        while (*str) {
-                while ((USART1->SR & 0x00000080) != 0x00000080);
-	        USART1->DR = (*str & 0xFF);
-                str++;
-        }
 }
 
 void initUART(void)
@@ -158,14 +150,15 @@ int main(void)
 	initUART();
 	initLED();
 
-	print_str("Hello World\r\n");
+	printf("Hello World\r\n");
 	tick = uwTick;
 	cmd = 0;
 	while (1) {
-		if (uwTick - tick > 1000) {
+		if (uwTick - tick >= 1000) {
 			tick = uwTick;
 			toggleLED(cmd);
 			cmd ^= 1;
+			printf("[%d] %s\r\n",tick,tmp);
 		}
 	}
 

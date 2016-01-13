@@ -8,9 +8,9 @@ SIZE    = $(PREFIX)size
 GDB     = $(PREFIX)gdb
 
 #CFLAG += -v
-CFLAG += -Wall -g -ggdb -Os
+CFLAG += -Wall -g -ggdb
 CFLAG += -mcpu=cortex-m3 -mlittle-endian -mthumb
-CFLAG += -nostartfiles -nostdlib
+CFLAG += -nostartfiles -nostdlib -fno-builtin
 CFLAG += -Tmyos.ld
 
 SRCS  = $(shell ls *.c) $(shell ls *.s)

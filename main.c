@@ -142,6 +142,14 @@ void SysTick_Handler(void)
 	uwTick++;
 }
 
+void delay(int ms)
+{
+	int now;
+
+	now = uwTick;
+	while (uwTick - now < ms);
+}
+
 int main(void)
 {
 	char cmd;
@@ -154,12 +162,10 @@ int main(void)
 	tick = uwTick;
 	cmd = 0;
 	while (1) {
-		if (uwTick - tick >= 1000) {
-			tick = uwTick;
-			toggleLED(cmd);
-			cmd ^= 1;
-			printf("[%d] %s\r\n",tick,tmp);
-		}
+		toggleLED(cmd);
+		cmd ^= 1;
+		printf("[%d] %s\r\n",tick);
+		delay(500);
 	}
 
 	return 1;

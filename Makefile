@@ -40,4 +40,4 @@ write: main.bin
 listen:
 	st-util
 debug: main.elf
-	$(GDB) $< -q -ex "target extended localhost:4242"	
+	$(GDB) $< -q -ex "target extended localhost:4242"

@@ -153,18 +153,16 @@ void delay(int ms)
 int main(void)
 {
 	char cmd;
-	uint32_t tick;
 	initSysTick();
 	initUART();
 	initLED();
 
 	printf("Hello World\r\n");
-	tick = uwTick;
 	cmd = 0;
 	while (1) {
 		toggleLED(cmd);
 		cmd ^= 1;
-		printf("[%d] %s\r\n",tick);
+		printf("[%d] %s\r\n",uwTick,"hello cm3");
 		delay(500);
 	}
 

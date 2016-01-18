@@ -111,6 +111,34 @@ void initLED(void)
 	GPIOA->ODR |= 0x00000020;
 }
 
+void initUserBtn(void)
+{
+	/* enable GPIOC */
+	RCC->APB2ENR |= 0x00000010;
+	/* set PC13 to flating input mode */
+	GPIOC->CRH &= 0xff0fffff;
+	GPIOC->CRH |= 0x00400000;
+	/* select PC13 to EXTI13 */
+	AFIO->EXTICR[3] |= 0x00000020;
+	/* set falling trigger */
+	EXTI->FTSR |= 0x00002000;
+	/* enable EXTI13 */
+	EXTI->IMR |= 0x00002000;
+	NVIC->ISER[0] |= 0x00400000;	/* IRQ NO 23 */
+}
+
+char getUserBtnValue(void)
+{
+	int rtn = 0;
+	
+	if ( (GPIOC->IDR &= 0x00002000) == 0x00002000)
+		rtn = 1;
+	else
+		rtn = 0;
+	
+	return rtn;
+}
+
 void toggleLED(char cmd)
 {
 	if (cmd)
@@ -142,6 +170,11 @@ void SysTick_Handler(void)
 	uwTick++;
 }
 
+void EXTI9_5_IRQHandler(void)
+{
+	printf("btn push!\r\n");
+}
+
 void delay(int ms)
 {
 	int now;
@@ -156,13 +189,15 @@ int main(void)
 	initSysTick();
 	initUART();
 	initLED();
+	initUserBtn();
 
 	printf("Hello World\r\n");
 	cmd = 0;
 	while (1) {
 		toggleLED(cmd);
 		cmd ^= 1;
-		printf("[%d] %s\r\n",uwTick,"hello cm3");
+		//printf("[%x] %d\r\n",uwTick,getUserBtnValue());
+		printf("[%x] %d %b\r\n",uwTick,uwTick,uwTick);
 		delay(500);
 	}
 

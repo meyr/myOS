@@ -69,7 +69,6 @@ unsigned int strlen(const char *str)
 	return cnt;
 }
 
-
 int printf(const char *format, ...) 
 {
 	int translating = 0;
@@ -90,6 +89,33 @@ int printf(const char *format, ...)
 					ret++;
 					translating = 0;
 				}
+			}
+			break;
+		case 'b':
+			if (translating) {
+				translating = 0;
+				arglist = arglist + 1;
+				itoa(*((int *)arglist), buf, 2);
+				if (puts(buf) < 0)
+					return 0;
+				ret += strlen(buf);
+			} else {
+				putc('x');
+				ret++;
+			}
+			break;
+	
+		case 'x':
+			if (translating) {
+				translating = 0;
+				arglist = arglist + 1;
+				itoa(*((int *)arglist), buf, 16);
+				if (puts(buf) < 0)
+					return 0;
+				ret += strlen(buf);
+			} else {
+				putc('x');
+				ret++;
 			}
 			break;
 		case 'd':

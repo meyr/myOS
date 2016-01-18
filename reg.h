@@ -1,6 +1,8 @@
 #define uint32_t	unsigned int
+#define uint8_t		unsigned char
 #define __IO		volatile
 #define __I		volatile const
+#define __O		volatile
 
 /*< Peripheral base address in the alias region */
 #define PERIPH_BASE           ((uint32_t)0x40000000) 
@@ -18,13 +20,16 @@
 #define GPIOD_BASE            (APB2PERIPH_BASE + 0x1400) /* 0x40011400 */
 #define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)
 #define AFIO_BASE             (APB2PERIPH_BASE + 0x0000) /* 0x40010000 */
+#define EXTI_BASE             (APB2PERIPH_BASE + 0x0400)
 
 /*< System Control Space Base Address  */
 #define SCS_BASE            (0xE000E000UL)                           
 /*< SysTick Base Address               */
 #define SysTick_BASE        (SCS_BASE +  0x0010UL)                    
+#define NVIC_BASE           (SCS_BASE +  0x0100UL)                    /*!< NVIC Base Address                  */
 
-struct RCC_STR {
+struct RCC_STR
+{
   __IO uint32_t CR;			/* 0x40021000 */
   __IO uint32_t CFGR;			/* 0x40021004 */
   __IO uint32_t CIR;			/* 0x40021008 */
@@ -37,7 +42,8 @@ struct RCC_STR {
   __IO uint32_t CSR;
 };
 
-struct FLASH_STR {
+struct FLASH_STR
+{
   __IO uint32_t ACR;
   __IO uint32_t KEYR;
   __IO uint32_t OPTKEYR;
@@ -49,7 +55,8 @@ struct FLASH_STR {
   __IO uint32_t WRPR;
 };
 
-struct USART_STR {
+struct USART_STR
+{
   __IO uint32_t SR;         /* Status register,   0x40013800      */
   __IO uint32_t DR;         /* Data register,     0x40013804      */
   __IO uint32_t BRR;        /* Baud rate register,0x40013808      */
@@ -70,7 +77,8 @@ struct GPIO_STR
   __IO uint32_t LCKR;
 };
 
-struct AFIO_STR {
+struct AFIO_STR
+{
   __IO uint32_t EVCR;
   __IO uint32_t MAPR;
   __IO uint32_t EXTICR[4];
@@ -78,13 +86,40 @@ struct AFIO_STR {
   __IO uint32_t MAPR2;  
 };
 
-struct SysTick_STR {
+struct SysTick_STR
+{
   __IO uint32_t CTRL;                    /*!< Offset: 0x000 (R/W)  SysTick Control and Status Register */
   __IO uint32_t LOAD;                    /*!< Offset: 0x004 (R/W)  SysTick Reload Value Register       */
   __IO uint32_t VAL;                     /*!< Offset: 0x008 (R/W)  SysTick Current Value Register      */
   __I  uint32_t CALIB;                   /*!< Offset: 0x00C (R/ )  SysTick Calibration Register        */
 };
 
+struct EXTI_STR
+{
+  __IO uint32_t IMR;
+  __IO uint32_t EMR;
+  __IO uint32_t RTSR;
+  __IO uint32_t FTSR;
+  __IO uint32_t SWIER;
+  __IO uint32_t PR;
+};
+
+struct NVIC_STR
+{
+  __IO uint32_t ISER[8];                 /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register           */
+       uint32_t RESERVED0[24];
+  __IO uint32_t ICER[8];                 /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register         */
+       uint32_t RSERVED1[24];
+  __IO uint32_t ISPR[8];                 /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register          */
+       uint32_t RESERVED2[24];
+  __IO uint32_t ICPR[8];                 /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register        */
+       uint32_t RESERVED3[24];
+  __IO uint32_t IABR[8];                 /*!< Offset: 0x200 (R/W)  Interrupt Active bit Register           */
+       uint32_t RESERVED4[56];
+  __IO uint8_t  IP[240];                 /*!< Offset: 0x300 (R/W)  Interrupt Priority Register (8Bit wide) */
+       uint32_t RESERVED5[644];
+  __O  uint32_t STIR;                    /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register     */
+};
 
 #define RCC                 ((struct RCC_STR *) RCC_BASE)
 #define FLASH               ((struct FLASH_STR *) FLASH_R_BASE)
@@ -96,3 +131,5 @@ struct SysTick_STR {
 #define GPIOE               ((struct GPIO_STR *) GPIOE_BASE)
 #define AFIO                ((struct AFIO_STR *) AFIO_BASE)
 #define SysTick             ((struct SysTick_STR *) SysTick_BASE)   /*!< SysTick configuration struct       */
+#define EXTI                ((struct EXTI_STR *) EXTI_BASE)
+#define NVIC                ((struct NVIC_STR *) NVIC_BASE)   /*!< NVIC configuration struct          */

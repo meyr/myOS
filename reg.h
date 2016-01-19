@@ -1,5 +1,8 @@
+#ifndef __REG_H
+#define __REG_H
 #define uint32_t	unsigned int
 #define uint8_t		unsigned char
+#define int32_t		int
 #define __IO		volatile
 #define __I		volatile const
 #define __O		volatile
@@ -20,13 +23,14 @@
 #define GPIOD_BASE            (APB2PERIPH_BASE + 0x1400) /* 0x40011400 */
 #define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)
 #define AFIO_BASE             (APB2PERIPH_BASE + 0x0000) /* 0x40010000 */
-#define EXTI_BASE             (APB2PERIPH_BASE + 0x0400)
+#define EXTI_BASE             (APB2PERIPH_BASE + 0x0400) /* 0x40010400 */
 
 /*< System Control Space Base Address  */
 #define SCS_BASE            (0xE000E000UL)                           
 /*< SysTick Base Address               */
 #define SysTick_BASE        (SCS_BASE +  0x0010UL)                    
-#define NVIC_BASE           (SCS_BASE +  0x0100UL)                    /*!< NVIC Base Address                  */
+#define NVIC_BASE           (SCS_BASE +  0x0100UL) /* 0xe000e100 */
+#define SCB_BASE            (SCS_BASE +  0x0D00UL)                    /*!< System Control Block Base Address  */
 
 struct RCC_STR
 {
@@ -121,6 +125,33 @@ struct NVIC_STR
   __O  uint32_t STIR;                    /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register     */
 };
 
+/** \brief  Structure type to access the System Control Block (SCB).
+ */
+struct SCB_STR
+{
+  __I  uint32_t CPUID;                   /*!< Offset: 0x000 (R/ )  CPUID Base Register                                   */
+  __IO uint32_t ICSR;                    /*!< Offset: 0x004 (R/W)  Interrupt Control and State Register                  */
+  __IO uint32_t VTOR;                    /*!< Offset: 0x008 (R/W)  Vector Table Offset Register                          */
+  __IO uint32_t AIRCR;                   /*!< Offset: 0x00C (R/W)  Application Interrupt and Reset Control Register      */
+  __IO uint32_t SCR;                     /*!< Offset: 0x010 (R/W)  System Control Register                               */
+  __IO uint32_t CCR;                     /*!< Offset: 0x014 (R/W)  Configuration Control Register                        */
+  __IO uint8_t  SHP[12];                 /*!< Offset: 0x018 (R/W)  System Handlers Priority Registers (4-7, 8-11, 12-15) */
+  __IO uint32_t SHCSR;                   /*!< Offset: 0x024 (R/W)  System Handler Control and State Register             */
+  __IO uint32_t CFSR;                    /*!< Offset: 0x028 (R/W)  Configurable Fault Status Register                    */
+  __IO uint32_t HFSR;                    /*!< Offset: 0x02C (R/W)  HardFault Status Register                             */
+  __IO uint32_t DFSR;                    /*!< Offset: 0x030 (R/W)  Debug Fault Status Register                           */
+  __IO uint32_t MMFAR;                   /*!< Offset: 0x034 (R/W)  MemManage Fault Address Register                      */
+  __IO uint32_t BFAR;                    /*!< Offset: 0x038 (R/W)  BusFault Address Register                             */
+  __IO uint32_t AFSR;                    /*!< Offset: 0x03C (R/W)  Auxiliary Fault Status Register                       */
+  __I  uint32_t PFR[2];                  /*!< Offset: 0x040 (R/ )  Processor Feature Register                            */
+  __I  uint32_t DFR;                     /*!< Offset: 0x048 (R/ )  Debug Feature Register                                */
+  __I  uint32_t ADR;                     /*!< Offset: 0x04C (R/ )  Auxiliary Feature Register                            */
+  __I  uint32_t MMFR[4];                 /*!< Offset: 0x050 (R/ )  Memory Model Feature Register                         */
+  __I  uint32_t ISAR[5];                 /*!< Offset: 0x060 (R/ )  Instruction Set Attributes Register                   */
+       uint32_t RESERVED0[5];
+  __IO uint32_t CPACR;                   /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register                   */
+};
+
 #define RCC                 ((struct RCC_STR *) RCC_BASE)
 #define FLASH               ((struct FLASH_STR *) FLASH_R_BASE)
 #define USART1              ((struct USART_STR *) USART1_BASE)
@@ -133,3 +164,6 @@ struct NVIC_STR
 #define SysTick             ((struct SysTick_STR *) SysTick_BASE)   /*!< SysTick configuration struct       */
 #define EXTI                ((struct EXTI_STR *) EXTI_BASE)
 #define NVIC                ((struct NVIC_STR *) NVIC_BASE)   /*!< NVIC configuration struct          */
+#define SCB                 ((struct SCB_STR *)  SCB_BASE)   /*!< SCB configuration struct           */
+
+#endif

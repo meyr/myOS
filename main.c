@@ -66,7 +66,7 @@ void SystemInit(void)
  	/* enable GPIOD */
  	//RCC->APB2ENR |= 0x00000020;
  	/* enable AFIO */
- 	//RCC->APB2ENR |= 0x00000001;
+ 	RCC->APB2ENR |= 0x00000001;
  	/* remap pd0/pd1 to OSC_IN/OSC_OUT */
  	//AFIO->MAPR |= 0x00008000; 
  	/* set MCO to SYSCLK */
@@ -124,7 +124,8 @@ void initUserBtn(void)
 	EXTI->FTSR |= 0x00002000;
 	/* enable EXTI13 */
 	EXTI->IMR |= 0x00002000;
-	NVIC->ISER[0] |= 0x00400000;	/* IRQ NO 23 */
+	NVIC->ICPR[1] |= 0x00000100;	/* IRQ NO 40 */
+	NVIC->ISER[1] |= 0x00000100;	/* IRQ NO 40 */
 }
 
 char getUserBtnValue(void)
@@ -170,11 +171,6 @@ void SysTick_Handler(void)
 	uwTick++;
 }
 
-void EXTI9_5_IRQHandler(void)
-{
-	printf("btn push!\r\n");
-}
-
 void delay(int ms)
 {
 	int now;
@@ -183,21 +179,38 @@ void delay(int ms)
 	while (uwTick - now < ms);
 }
 
+
+void Default_Handler(void)
+{
+	static char cmd;
+	while (1) {
+		toggleLED(cmd);
+		cmd ^= 1;
+		delay(500);
+	}
+}
+
+void EXTI15_10_IRQHandler(void)
+{	
+	/* clean pending register */
+	EXTI->PR = 0x00002000;
+
+	printf("btn push!\r\n");
+	//toggleLED(0);
+}
+
 int main(void)
 {
-	char cmd;
 	initSysTick();
 	initUART();
 	initLED();
 	initUserBtn();
 
 	printf("Hello World\r\n");
-	cmd = 0;
+	toggleLED(1);
 	while (1) {
-		toggleLED(cmd);
-		cmd ^= 1;
-		//printf("[%x] %d\r\n",uwTick,getUserBtnValue());
-		printf("[%x] %d %b\r\n",uwTick,uwTick,uwTick);
+
+		//printf("[%x] %d %b\r\n",uwTick,uwTick,uwTick);
 		delay(500);
 	}
 

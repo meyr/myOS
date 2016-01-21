@@ -168,6 +168,14 @@ struct SCB_STR
 
 /* global variable */
 
-__IO uint32_t uwTick;
+extern __IO uint32_t uwTick;
 
+/* global function */
+void initSysTick(void);
+void delay(int ms);
+
+unsigned int strlen(char *str);
+int printf(const char *format, ...);
+
+int sv_call_write_data(char *string, int length);
 #endif

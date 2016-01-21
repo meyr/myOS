@@ -1,7 +1,5 @@
 #include "reg.h"
 
-extern int printf(const char *format, ...);
-
 void SystemInit(void)
 {
 	/* Reset the RCC clock configuration to the default reset state(for debug purpose) */
@@ -147,38 +145,6 @@ void toggleLED(char cmd)
 		GPIOA->ODR &= 0xffffffdf;
 }
 
-void initSysTick(void)
-{
-	/* select clock source to AHB/8 */
-	SysTick->CTRL &= 0xfffffffb;
-
-	/* enable assert SysTick exception request if count down to zero */
-	SysTick->CTRL |= 0x00000002;
-
-	/* set RELOAD value to 8000
-	 * clock source 64Mhz/ 8 = 8Mhz
-	 * 8M / 8000 = 1Khz => 1ms 
-	 */
-	SysTick->LOAD = 0x00001f40;
-
-	/* enable the counter */
-	SysTick->CTRL |= 0x00000001;
-}
-
-void SysTick_Handler(void)
-{
-	uwTick++;
-}
-
-void delay(int ms)
-{
-	int now;
-
-	now = uwTick;
-	while (uwTick - now < ms);
-}
-
-
 void Default_Handler(void)
 {
 	static char cmd;
@@ -198,39 +164,9 @@ void EXTI15_10_IRQHandler(void)
 	//toggleLED(0);
 }
 
-void svc_handler_c(unsigned int *svc_args)
-{
-	unsigned int svc_number;
-
-	svc_number = ((char *)svc_args[6])[-2];
-	printf("svc number %d\r\n",svc_number);
-
-	svc_args[0] = 128;
-}
-
-void SVC_Handler(void)
-{
-	asm volatile (
-		"tst lr, #4\t\n"
-		"ite eq\t\n"
-		"mrseq r0, msp\t\n"
-		"mrsne r0, psp\t\n"
-		"b svc_handler_c");
-}
-
-#define svc(code) asm volatile ("svc %[immediate]"::[immediate] "I" (code))
-#define SVC_WRITE_DATA 7
-int sv_call_write_data(void)
-//void sv_call_write_data(char *string, int length)
-{
-	int rtn;
-	svc(SVC_WRITE_DATA);
-	asm volatile ("mov %0, r0\t\n":"=r"(rtn)::);
-	return rtn;
-}
-
 int main(void)
 {
+	char string[] = "hi cortex m3\r\n";
 	int rtn;
 	initSysTick();
 	initUART();
@@ -239,7 +175,7 @@ int main(void)
 
 
 	/* system call */
-	rtn = sv_call_write_data();
+	rtn = sv_call_write_data(string, strlen(string));
 	printf("return value from sv_call_write_data %d\r\n", rtn);
 	//syscall(3);
 

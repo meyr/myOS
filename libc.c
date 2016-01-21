@@ -58,7 +58,7 @@ char *itoa(int n, char *str, int radix)
 	return str;
 }
 
-unsigned int strlen(const char *str)
+unsigned int strlen(char *str)
 {
 	int cnt = 0;
 	if (!str)

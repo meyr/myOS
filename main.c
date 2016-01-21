@@ -1,7 +1,6 @@
 #include "reg.h"
 
 extern int printf(const char *format, ...);
-__IO uint32_t uwTick;
 
 void SystemInit(void)
 {
@@ -199,19 +198,57 @@ void EXTI15_10_IRQHandler(void)
 	//toggleLED(0);
 }
 
+void svc_handler_c(unsigned int *svc_args)
+{
+	unsigned int svc_number;
+
+	svc_number = ((char *)svc_args[6])[-2];
+	printf("svc number %d\r\n",svc_number);
+
+	svc_args[0] = 128;
+}
+
+void SVC_Handler(void)
+{
+	asm volatile (
+		"tst lr, #4\t\n"
+		"ite eq\t\n"
+		"mrseq r0, msp\t\n"
+		"mrsne r0, psp\t\n"
+		"b svc_handler_c");
+}
+
+#define svc(code) asm volatile ("svc %[immediate]"::[immediate] "I" (code))
+#define SVC_WRITE_DATA 7
+int sv_call_write_data(void)
+//void sv_call_write_data(char *string, int length)
+{
+	int rtn;
+	svc(SVC_WRITE_DATA);
+	asm volatile ("mov %0, r0\t\n":"=r"(rtn)::);
+	return rtn;
+}
+
 int main(void)
 {
+	int rtn;
 	initSysTick();
 	initUART();
 	initLED();
 	initUserBtn();
+
+
+	/* system call */
+	rtn = sv_call_write_data();
+	printf("return value from sv_call_write_data %d\r\n", rtn);
+	//syscall(3);
 
 	printf("Hello World\r\n");
 	toggleLED(1);
 	while (1) {
 
 		//printf("[%x] %d %b\r\n",uwTick,uwTick,uwTick);
-		delay(500);
+		//delay(500);
 	}
 
 	return 1;

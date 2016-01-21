@@ -166,4 +166,8 @@ struct SCB_STR
 #define NVIC                ((struct NVIC_STR *) NVIC_BASE)   /*!< NVIC configuration struct          */
 #define SCB                 ((struct SCB_STR *)  SCB_BASE)   /*!< SCB configuration struct           */
 
+/* global variable */
+
+__IO uint32_t uwTick;
+
 #endif

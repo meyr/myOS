@@ -168,11 +168,11 @@ int main(void)
 {
 	char string[] = "hi cortex m3\r\n";
 	int rtn;
+	MpuInit();
 	initSysTick();
 	initUART();
 	initLED();
 	initUserBtn();
-
 
 	/* system call */
 	rtn = sv_call_write_data(string, strlen(string));

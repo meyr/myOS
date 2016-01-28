@@ -31,6 +31,7 @@
 #define SysTick_BASE        (SCS_BASE +  0x0010UL)                    
 #define NVIC_BASE           (SCS_BASE +  0x0100UL) /* 0xe000e100 */
 #define SCB_BASE            (SCS_BASE +  0x0D00UL)                    /*!< System Control Block Base Address  */
+#define MPU_BASE            (SCS_BASE +  0x0D90UL)                    /*!< Memory Protection Unit   */
 
 struct RCC_STR
 {
@@ -152,6 +153,24 @@ struct SCB_STR
   __IO uint32_t CPACR;                   /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register                   */
 };
 
+
+/** \brief  Structure type to access the Memory Protection Unit (MPU).
+ */
+struct MPU_STR
+{
+  __I  uint32_t TYPE;                    /*!< Offset: 0x000 (R/ )  MPU Type Register                              */
+  __IO uint32_t CTRL;                    /*!< Offset: 0x004 (R/W)  MPU Control Register                           */
+  __IO uint32_t RNR;                     /*!< Offset: 0x008 (R/W)  MPU Region RNRber Register                     */
+  __IO uint32_t RBAR;                    /*!< Offset: 0x00C (R/W)  MPU Region Base Address Register               */
+  __IO uint32_t RASR;                    /*!< Offset: 0x010 (R/W)  MPU Region Attribute and Size Register         */
+  __IO uint32_t RBAR_A1;                 /*!< Offset: 0x014 (R/W)  MPU Alias 1 Region Base Address Register       */
+  __IO uint32_t RASR_A1;                 /*!< Offset: 0x018 (R/W)  MPU Alias 1 Region Attribute and Size Register */
+  __IO uint32_t RBAR_A2;                 /*!< Offset: 0x01C (R/W)  MPU Alias 2 Region Base Address Register       */
+  __IO uint32_t RASR_A2;                 /*!< Offset: 0x020 (R/W)  MPU Alias 2 Region Attribute and Size Register */
+  __IO uint32_t RBAR_A3;                 /*!< Offset: 0x024 (R/W)  MPU Alias 3 Region Base Address Register       */
+  __IO uint32_t RASR_A3;                 /*!< Offset: 0x028 (R/W)  MPU Alias 3 Region Attribute and Size Register */
+};
+
 #define RCC                 ((struct RCC_STR *) RCC_BASE)
 #define FLASH               ((struct FLASH_STR *) FLASH_R_BASE)
 #define USART1              ((struct USART_STR *) USART1_BASE)
@@ -165,6 +184,7 @@ struct SCB_STR
 #define EXTI                ((struct EXTI_STR *) EXTI_BASE)
 #define NVIC                ((struct NVIC_STR *) NVIC_BASE)   /*!< NVIC configuration struct          */
 #define SCB                 ((struct SCB_STR *)  SCB_BASE)   /*!< SCB configuration struct           */
+#define MPU		    ((struct MPU_STR *)  MPU_BASE)   /*!< Memory Protection Unit */ 
 
 /* global variable */
 

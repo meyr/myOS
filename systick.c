@@ -3,6 +3,9 @@
 __IO uint32_t uwTick;
 void initSysTick(void)
 {
+	/* disable systick and clear configuration */
+	SysTick->CTRL = 0x0;
+
 	/* select clock source to AHB/8 */
 	SysTick->CTRL &= 0xfffffffb;
 
@@ -22,6 +25,10 @@ void initSysTick(void)
 void SysTick_Handler(void)
 {
 	uwTick++;
+	/* set pendsv pending bit to 
+	 * triggle pendsv
+	 */
+	SCB->ICSR |= 0x10000000;
 }
 
 void delay(int ms)

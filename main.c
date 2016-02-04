@@ -1,77 +1,5 @@
 #include "reg.h"
 
-void SystemInit(void)
-{
-	/* Reset the RCC clock configuration to the default reset state(for debug purpose) */
-	/* Set HSION bit */
-	RCC->CR |= (uint32_t)0x00000001;
-	
-	/* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
-	RCC->CFGR &= (uint32_t)0xF8FF0000;
-	
-	/* Reset HSEON, CSSON and PLLON bits */
-	RCC->CR &= (uint32_t)0xFEF6FFFF;
-	
-	/* Reset HSEBYP bit */
-	RCC->CR &= (uint32_t)0xFFFBFFFF;
-	
-	/* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE/OTGFSPRE bits */
-	RCC->CFGR &= (uint32_t)0xFF80FFFF;
-	
-	/* Disable all interrupts and clear pending bits  */
-	//RCC->CIR = 0x009F0000;
-	RCC->CIR = 0x00000000;
-    
-	/* config HSI */
-		/* enable HSI */
-		RCC->CR |= 0x00000001;
-		/* wait HSI RDY */
-		while ((RCC->CR & 0x00000002) != 0x00000002);
-
-	/* config PLL */
-		/* set PLL source to HSI/2 */
-		RCC->CFGR &= 0xFFFEFFFF;
-		
-		/* set PLLMUL to x16 */
-		RCC->CFGR |= 0x00380000;
-		
-		/* set PLL ON */
-		RCC->CR |= 0x01000000;
-		
-		/* wait PLL RDY */
-		while ((RCC->CR & 0x02000000) != 0x02000000);
-
-	/* set APB1 prescaler to 2 */
-	RCC->CFGR |= 0x00000400;
-	
-	/* enable prefetch */
-	FLASH->ACR |= 0x00000010;
-	
-	/* set wait 2 cyccle for 64Mhz */
-	FLASH->ACR &= 0xfffffff8;
-	FLASH->ACR |= 0x00000002;
-
-	/* set SYSCLK to PLLCLK */
-	RCC->CFGR &= 0xFFFFFFFC;
-	RCC->CFGR |= 0x00000002;
-
- 	/*  stm32f103rb nucleo board PD0/MCO pin connect to
-	 *  stm32f103cbt6 jtag ic mco output the freq. is the same
-	 *  to this IC input external oscillator freq.
-	 */
-	
- 	/* enable GPIOD */
- 	//RCC->APB2ENR |= 0x00000020;
- 	/* enable AFIO */
- 	RCC->APB2ENR |= 0x00000001;
- 	/* remap pd0/pd1 to OSC_IN/OSC_OUT */
- 	//AFIO->MAPR |= 0x00008000; 
- 	/* set MCO to SYSCLK */
- 	//RCC->CFGR &= 0xF8FFFFFF;
- 	//RCC->CFGR |= 0x04000000;
-
-}
-
 void initUART(void)
 {
 
@@ -120,8 +48,13 @@ void initUserBtn(void)
 	/* set falling trigger */
 	EXTI->FTSR |= 0x00002000;
 	/* enable EXTI13 */
+	/* clear interrupt mask */
 	EXTI->IMR |= 0x00002000;
+	/* clear EXTI interrupt pending register */
+	EXTI->PR = 0x00002000;
+	/* clear NVIC interuput pending register */
 	NVIC->ICPR[1] |= 0x00000100;	/* IRQ NO 40 */
+	/* set interrupt enable */
 	NVIC->ISER[1] |= 0x00000100;	/* IRQ NO 40 */
 }
 
@@ -145,47 +78,32 @@ void toggleLED(char cmd)
 		GPIOA->ODR &= 0xffffffdf;
 }
 
-void Default_Handler(void)
+int user_main(void)
 {
-	static char cmd;
+	uint8_t toggle = 0;
+	printf("Hello World\n");
+	toggleLED(1);
+	/* system call */
 	while (1) {
-		toggleLED(cmd);
-		cmd ^= 1;
-		delay(500);
+		toggleLED(toggle);
+		delay(1000);
+		toggle = toggle ? 0 : 1;
 	}
+
 }
 
-void EXTI15_10_IRQHandler(void)
-{	
-	/* clean pending register */
-	EXTI->PR = 0x00002000;
-
-	printf("btn push!\r\n");
-	//toggleLED(0);
-}
-
-int main(void)
+int kernel_main(void)
 {
-	char string[] = "hi cortex m3\r\n";
-	int rtn;
 	MpuInit();
 	initSysTick();
 	initUART();
 	initLED();
 	initUserBtn();
-
-	/* system call */
-	rtn = sv_call_write_data(string, strlen(string));
-	printf("return value from sv_call_write_data %d\r\n", rtn);
-	//syscall(3);
-
-	printf("Hello World\r\n");
-	toggleLED(1);
-	while (1) {
-
-		//printf("[%x] %d %b\r\n",uwTick,uwTick,uwTick);
-		//delay(500);
-	}
+	SetupPSP(0x20002800);
+	SwitchToUserMode();
+	user_main();
 
 	return 1;
 }
+
+

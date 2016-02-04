@@ -1,21 +1,16 @@
 #include "reg.h"
 
-int putc(int c)
+int putc(char c)
 {
-	while ((USART1->SR & 0x00000080) != 0x00000080);
-		USART1->DR = (c & 0xFF);
-
+	char str[2] = {0};
+	str[0] = c;
+	svc_call_write_string(str);
 	return 1;
 }
 
-int puts(const char *s)
+int puts(char *s)
 {
-        while (*s) {
-                while ((USART1->SR & 0x00000080) != 0x00000080);
-	        USART1->DR = (*s & 0xFF);
-                s++;
-        }
-
+	svc_call_write_string(s);
 	return 1;
 }
 
@@ -143,6 +138,8 @@ int printf(const char *format, ...)
 		default:
 			if (translating)
 				translating = 0;
+			if (*p == '\n')
+				putc('\r');
 			putc(*p);
 			ret++;
 			break;
@@ -151,3 +148,10 @@ int printf(const char *format, ...)
 	return ret;
 }
 
+void memcpy(uint8_t *dest, uint8_t *src, uint32_t size)
+{
+	uint32_t i;
+	for (i = 0; i < size; i++)
+		*(dest + i) = *(src + i);
+	return;
+}

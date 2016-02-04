@@ -24,14 +24,22 @@
 #define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)
 #define AFIO_BASE             (APB2PERIPH_BASE + 0x0000) /* 0x40010000 */
 #define EXTI_BASE             (APB2PERIPH_BASE + 0x0400) /* 0x40010400 */
+#define PWR_BASE              (APB1PERIPH_BASE + 0x7000) /* 0x40007000 */
 
 /*< System Control Space Base Address  */
 #define SCS_BASE            (0xE000E000UL)                           
 /*< SysTick Base Address               */
 #define SysTick_BASE        (SCS_BASE +  0x0010UL)                    
 #define NVIC_BASE           (SCS_BASE +  0x0100UL) /* 0xe000e100 */
-#define SCB_BASE            (SCS_BASE +  0x0D00UL)                    /*!< System Control Block Base Address  */
-#define MPU_BASE            (SCS_BASE +  0x0D90UL)                    /*!< Memory Protection Unit   */
+#define SCB_BASE            (SCS_BASE +  0x0D00UL) /* 0xe000ed00 */
+#define MPU_BASE            (SCS_BASE +  0x0D90UL) /* 0xe000ed90 */
+
+struct PWR_STR
+{
+  __IO uint32_t CR;
+  __IO uint32_t CSR;
+};
+
 
 struct RCC_STR
 {
@@ -185,17 +193,40 @@ struct MPU_STR
 #define NVIC                ((struct NVIC_STR *) NVIC_BASE)   /*!< NVIC configuration struct          */
 #define SCB                 ((struct SCB_STR *)  SCB_BASE)   /*!< SCB configuration struct           */
 #define MPU		    ((struct MPU_STR *)  MPU_BASE)   /*!< Memory Protection Unit */ 
+#define PWR                 ((struct PWR_STR *) PWR_BASE)
 
 /* global variable */
 
 extern __IO uint32_t uwTick;
 
+/* kernel */
+uint32_t GetPSP(void);
+uint32_t GetSP(void);
+void SetupPSP(uint32_t address);
+void SwitchToUserMode(void);
+int kprintf(const char *format, ...);
 /* global function */
 void initSysTick(void);
 void delay(int ms);
-
+void MpuInit(void);
+/* cmsis */
+void NVIC_SystemReset(void);
+void NVIC_VectReset(void);
+void __WFI(void);
+void __WFE(void);
+/* power */
+void pwr_standby(void);
+void pwr_sleep(void);
+void pwr_sleeponexit(void);
+void pwr_stopRon(void);
+void pwr_stopRlow(void);
+/* libc */
 unsigned int strlen(char *str);
 int printf(const char *format, ...);
-
-int sv_call_write_data(char *string, int length);
+void memcpy(uint8_t *dest, uint8_t *src, uint32_t size);
+char *itoa(int n, char *str, int radix);
+/* svc */
+int svc_call_write_string(char *string);
+/* led */
+void toggleLED(char cmd);
 #endif

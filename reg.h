@@ -205,6 +205,7 @@ uint32_t GetSP(void);
 void SetupPSP(uint32_t address);
 void SwitchToUserMode(void);
 int kprintf(const char *format, ...);
+void activate(uint32_t address);
 /* global function */
 void initSysTick(void);
 void delay(int ms);

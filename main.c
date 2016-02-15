@@ -78,7 +78,7 @@ void toggleLED(char cmd)
 		GPIOA->ODR &= 0xffffffdf;
 }
 
-int user_main(void)
+void user1_main(void)
 {
 	uint8_t toggle = 0;
 	printf("Hello World\n");
@@ -88,9 +88,29 @@ int user_main(void)
 		toggleLED(toggle);
 		delay(1000);
 		toggle = toggle ? 0 : 1;
+		printf("user1_main\n");
 	}
 
 }
+
+void user2_main(void)
+{
+	while(1) {
+		delay(1000);
+		printf("user2_main\n");
+
+	}
+}
+
+void create_task(uint32_t *address, void (*start)(void))
+{
+	uint8_t i;
+	for (i = 1; i < 11; i++)
+		*(address - i) = 0x0;
+
+	*(address - 1) = start;		
+}
+
 
 int kernel_main(void)
 {
@@ -99,9 +119,13 @@ int kernel_main(void)
 	initUART();
 	initLED();
 	initUserBtn();
-	SetupPSP(0x20002800);
-	SwitchToUserMode();
-	user_main();
+	
+	create_task((uint32_t *)(0x20002800), user1_main);
+	create_task((uint32_t *)(0x20002900), user2_main);
+	activate(0x20002800 - 0x28);
+	//SetupPSP(0x20002800);
+	//SwitchToUserMode();
+	//user_main();
 
 	return 1;
 }

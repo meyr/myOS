@@ -22,13 +22,16 @@ void initSysTick(void)
 	SysTick->CTRL |= 0x00000001;
 }
 
+uint8_t enablePendSV;
 void SysTick_Handler(void)
 {
 	uwTick++;
+
 	/* set pendsv pending bit to 
 	 * triggle pendsv
 	 */
-	SCB->ICSR |= 0x10000000;
+	if ((uwTick % 10 == 9) & enablePendSV)	
+		SCB->ICSR |= 0x10000000;
 }
 
 void delay(int ms)

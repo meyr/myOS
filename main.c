@@ -81,37 +81,37 @@ void toggleLED(char cmd)
 void user1_main(void)
 {
 	uint8_t toggle = 0;
-	printf("Hello World\n");
+	//printf("Hello World user1\n");
 	toggleLED(1);
 	/* system call */
 	while (1) {
+		printf("1\n");
 		toggleLED(toggle);
 		delay(1000);
 		toggle = toggle ? 0 : 1;
-		printf("user1_main\n");
+		//printf("user1_main\n");
 	}
 
 }
 
 void user2_main(void)
 {
+	//printf("Hello World user2\n");
 	while(1) {
-		delay(1000);
-		printf("user2_main\n");
-
+		printf("2\n");
+		delay(3000);
 	}
 }
 
-void create_task(uint32_t *address, void (*start)(void))
+void user3_main(void)
 {
-	uint8_t i;
-	for (i = 1; i < 11; i++)
-		*(address - i) = 0x0;
-
-	*(address - 1) = start;		
+	while(1) {
+		printf("3\n");
+		delay(1500);
+	}
 }
 
-
+extern uint8_t enablePendSV;
 int kernel_main(void)
 {
 	MpuInit();
@@ -122,10 +122,16 @@ int kernel_main(void)
 	
 	create_task((uint32_t *)(0x20002800), user1_main);
 	create_task((uint32_t *)(0x20002900), user2_main);
-	activate(0x20002800 - 0x28);
+	create_task((uint32_t *)(0x20002a00), user3_main);
+	enablePendSV = 1;
+	thread_start();
+	//activate(0);
+
 	//SetupPSP(0x20002800);
 	//SwitchToUserMode();
 	//user_main();
+
+	while(1);
 
 	return 1;
 }

@@ -111,6 +111,16 @@ uint32_t GetSP(void)
 	return (rtn + 8);
 }
 
+inline uint32_t __get_CONTROL(void)
+{
+	uint32_t result;
+	asm volatile(
+		"mrs %0, CONTROL\t\n"
+		:"=r"(result)::
+	);
+	return result;
+}
+
 int kputc(int c)
 {
 	while ((USART1->SR & 0x00000080) != 0x00000080);
@@ -212,5 +222,55 @@ int kprintf(const char *format, ...)
 		}
 	}
 	return ret;
+}
+
+uint8_t task_no;
+uint8_t now_task;
+uint32_t task_sp[8];
+uint8_t first = 1;
+
+void create_task(uint32_t *address, void (*start)(void))
+{
+	uint8_t i;
+	if (first) {
+		for (i = 0; i < 9; i++)
+			*(address - i) = 0x0;
+
+		*(address - 1) = start;		
+		task_sp[task_no++] = (address - 9);
+		first  = 0;
+	} else {
+		for (i = 0; i < 17; i++)
+			*(address - i) = 0x0;
+
+		*(address - 1) = 0x01000000;
+		*(address - 2) = start;		
+		*(address - 9) = 0xfffffffd;
+		task_sp[task_no++] = (address - 17);
+	}
+}
+
+void thread_start()
+{
+	now_task = 0;
+
+	/* Save kernel context */
+	asm volatile("mrs ip, psr\t\n");
+	asm volatile("push {r4-r11, ip, lr}\t\n");
+
+	/* load first task stack pointer */
+	asm volatile("mov r0, %0\t\n" : : "r" (task_sp[now_task]));
+	/* Load user task's context and jump to the task */
+	asm volatile("msr psp, r0\t\n");
+	asm volatile("mov r0, #3\t\n");
+	asm volatile("msr control, r0\t\n");
+	asm volatile("isb\t\n");
+	asm volatile("pop {r4-r11, lr}\t\n");
+}
+
+void activate(uint8_t index)
+{
+	_activate(task_sp[index]);
+	now_task= index;
 }
 

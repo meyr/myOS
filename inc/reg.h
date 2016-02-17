@@ -206,8 +206,6 @@ void SetupPSP(uint32_t address);
 void SwitchToUserMode(void);
 int kprintf(const char *format, ...);
 void create_task(uint32_t *address, void (*start)(void));
-void _activate(uint32_t address);
-void activate(uint8_t index);
 void thread_start(void);
 /* global function */
 void initSysTick(void);

@@ -30,7 +30,7 @@ void SysTick_Handler(void)
 	/* set pendsv pending bit to 
 	 * triggle pendsv
 	 */
-	if ((uwTick % 10 == 9) & enablePendSV)	
+	//if ((uwTick % 10 == 9) & enablePendSV)	
 		SCB->ICSR |= 0x10000000;
 }
 

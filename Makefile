@@ -12,9 +12,10 @@ CFLAG += -Wall -g -ggdb
 CFLAG += -mcpu=cortex-m3 -mlittle-endian -mthumb
 CFLAG += -nostartfiles -nostdlib -fno-builtin
 CFLAG += -fomit-frame-pointer
+CFLAG += -Iinc/
 CFLAG += -Tmyos.ld
 
-SRCS  = $(shell ls *.c) $(shell ls *.s)
+SRCS  = $(shell ls src/*.c) $(shell ls src/*.s)
 OBJS1 = $(SRCS:.c=.o)
 OBJS  = $(OBJS1:.s=.o)
 

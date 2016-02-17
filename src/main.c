@@ -85,7 +85,7 @@ void user1_main(void)
 	toggleLED(1);
 	/* system call */
 	while (1) {
-		printf("1\n");
+		printf("[%d] 1\n",uwTick);
 		toggleLED(toggle);
 		delay(1000);
 		toggle = toggle ? 0 : 1;
@@ -98,16 +98,16 @@ void user2_main(void)
 {
 	//printf("Hello World user2\n");
 	while(1) {
-		printf("2\n");
-		delay(3000);
+		printf("[%d] 2\n",uwTick);
+		delay(2000);
 	}
 }
 
 void user3_main(void)
 {
 	while(1) {
-		printf("3\n");
-		delay(1500);
+		printf("[%d] 3\n",uwTick);
+		delay(3000);
 	}
 }
 
@@ -125,11 +125,6 @@ int kernel_main(void)
 	create_task((uint32_t *)(0x20002a00), user3_main);
 	enablePendSV = 1;
 	thread_start();
-	//activate(0);
-
-	//SetupPSP(0x20002800);
-	//SwitchToUserMode();
-	//user_main();
 
 	while(1);
 

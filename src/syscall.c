@@ -17,11 +17,11 @@ void svc_handler_c(unsigned int *svc_args)
 {
 	unsigned int svc_number;
 	unsigned int svc_r0;
-	unsigned int svc_r1;
+	//unsigned int svc_r1;
 
 	svc_number = ((char *)svc_args[6])[-2];
 	svc_r0 = ((unsigned long) svc_args[0]);
-	svc_r1 = ((unsigned long) svc_args[1]);
+	//svc_r1 = ((unsigned long) svc_args[1]);
 	switch (svc_number) {
 		case SVC_WRITE_STRING :
 			svc_args[0] = _write_data((const char *)svc_r0);						

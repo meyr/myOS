@@ -236,17 +236,17 @@ void create_task(uint32_t *address, void (*start)(void))
 		for (i = 0; i < 9; i++)
 			*(address - i) = 0x0;
 
-		*(address - 1) = start;		
-		task_sp[task_no++] = (address - 9);
+		*(address - 1) = (uint32_t)start;		
+		task_sp[task_no++] = (uint32_t)(address - 9);
 		first  = 0;
 	} else {
 		for (i = 0; i < 17; i++)
 			*(address - i) = 0x0;
 
 		*(address - 1) = 0x01000000;
-		*(address - 2) = start;		
+		*(address - 2) = (uint32_t)start;		
 		*(address - 9) = 0xfffffffd;
-		task_sp[task_no++] = (address - 17);
+		task_sp[task_no++] = (uint32_t)(address - 17);
 	}
 }
 
@@ -268,9 +268,4 @@ void thread_start()
 	asm volatile("pop {r4-r11, lr}\t\n");
 }
 
-void activate(uint8_t index)
-{
-	_activate(task_sp[index]);
-	now_task= index;
-}
 

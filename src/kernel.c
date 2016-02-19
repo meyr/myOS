@@ -225,42 +225,68 @@ int kprintf(const char *format, ...)
 	return ret;
 }
 
-uint8_t task_no;
-uint8_t now_task;
-uint32_t task_sp[8];
 uint8_t first = 1;
+struct task *now_task;
+struct task *task_list;
 
 void create_task(uint32_t *address, void (*start)(void))
 {
 	uint8_t i;
+	struct task *t;
 	if (first) {
 		for (i = 0; i < 9; i++)
 			*(address - i) = 0x0;
 
 		*(address - 1) = (uint32_t)start;		
-		task_sp[task_no++] = (uint32_t)(address - 9);
+		t = (struct task *)kmalloc(sizeof(struct task));
+		t->sp = (uint32_t)(address - 9);
+		t->priority = 0;
+		t->next = t;
+		t->prev = t;
+		task_list = t;
 		first  = 0;
 	} else {
 		for (i = 0; i < 17; i++)
 			*(address - i) = 0x0;
 
-		*(address - 1) = 0x01000000;
+		*(address - 1) = 0x01000000;	/* psr = thumb state */
 		*(address - 2) = (uint32_t)start;		
-		*(address - 9) = 0xfffffffd;
-		task_sp[task_no++] = (uint32_t)(address - 17);
+		*(address - 9) = 0xfffffffd;	/* return to thread mode (LR)*/
+		t = (struct task *)kmalloc(sizeof(struct task));
+		t->sp = (uint32_t)(address - 17);
+		task_list->prev->next = t;
+		t->next = task_list;
+		t->prev = task_list->prev;
+		task_list->prev = t;
 	}
+}
+
+void task_show(void)
+{
+	struct task *p;
+	uint8_t i;
+
+	i = 1;
+	p = task_list;
+	if (p != NULL) {
+		do {
+			kprintf("task %d : sp %x\n", i++, p->sp);
+			p = p->next; 
+		} while (p != task_list);
+	}
+	
 }
 
 void thread_start()
 {
-	now_task = 0;
+	now_task = task_list;
 
 	/* Save kernel context */
 	asm volatile("mrs ip, psr\t\n");
 	asm volatile("push {r4-r11, ip, lr}\t\n");
 
 	/* load first task stack pointer */
-	asm volatile("mov r0, %0\t\n" : : "r" (task_sp[now_task]));
+	asm volatile("mov r0, %0\t\n" : : "r" (task_list->sp));
 	/* Load user task's context and jump to the task */
 	asm volatile("msr psp, r0\t\n");
 	asm volatile("mov r0, #3\t\n");

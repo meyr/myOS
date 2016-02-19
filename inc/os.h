@@ -6,6 +6,14 @@
 #define HEAP_START 0x20002800
 #define MAX_HEAPS 4096
 
+struct task {
+	uint32_t sp;
+	uint8_t  priority;
+	struct task *next;
+	struct task *prev;
+};
+
+
 /* global variable */
 
 extern __IO uint32_t uwTick;
@@ -18,6 +26,7 @@ void SwitchToUserMode(void);
 int kprintf(const char *format, ...);
 void create_task(uint32_t *address, void (*start)(void));
 void thread_start(void);
+void task_show(void);
 void *kmalloc(unsigned int nbytes);
 void kfree(void *ap);
 /* global function */

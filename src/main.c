@@ -1,4 +1,5 @@
 #include "reg.h"
+#include "os.h"
 
 void initUART(void)
 {

@@ -1,11 +1,7 @@
 #ifndef __REG_H
 #define __REG_H
-#define uint32_t	unsigned int
-#define uint8_t		unsigned char
-#define int32_t		int
-#define __IO		volatile
-#define __I		volatile const
-#define __O		volatile
+
+#include "stddef.h"
 
 /*< Peripheral base address in the alias region */
 #define PERIPH_BASE           ((uint32_t)0x40000000) 
@@ -195,40 +191,4 @@ struct MPU_STR
 #define MPU		    ((struct MPU_STR *)  MPU_BASE)   /*!< Memory Protection Unit */ 
 #define PWR                 ((struct PWR_STR *) PWR_BASE)
 
-/* global variable */
-
-extern __IO uint32_t uwTick;
-
-/* kernel */
-uint32_t GetPSP(void);
-uint32_t GetSP(void);
-void SetupPSP(uint32_t address);
-void SwitchToUserMode(void);
-int kprintf(const char *format, ...);
-void create_task(uint32_t *address, void (*start)(void));
-void thread_start(void);
-/* global function */
-void initSysTick(void);
-void delay(int ms);
-void MpuInit(void);
-/* cmsis */
-void NVIC_SystemReset(void);
-void NVIC_VectReset(void);
-void __WFI(void);
-void __WFE(void);
-/* power */
-void pwr_standby(void);
-void pwr_sleep(void);
-void pwr_sleeponexit(void);
-void pwr_stopRon(void);
-void pwr_stopRlow(void);
-/* libc */
-unsigned int strlen(char *str);
-int printf(const char *format, ...);
-void memcpy(uint8_t *dest, uint8_t *src, uint32_t size);
-char *itoa(int n, char *str, int radix);
-/* svc */
-int svc_call_write_string(char *string);
-/* led */
-void toggleLED(char cmd);
 #endif

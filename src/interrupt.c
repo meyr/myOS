@@ -1,4 +1,5 @@
 #include "reg.h"
+#include "os.h"
 
 extern uint8_t task_no;
 extern uint8_t now_task;

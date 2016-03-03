@@ -38,7 +38,7 @@ clean:
 
 .PHONY: write
 write: main.bin
-	st-flash write $< 0x8000000
+	st-flash --reset write $< 0x8000000
 listen:
 	st-util
 debug: main.elf

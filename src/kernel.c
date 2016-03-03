@@ -1,61 +1,52 @@
 #include "reg.h"
 #include "os.h"
 
-void SystemInit(void)
+void RCC_init(void)
 {
 	/* Reset the RCC clock configuration to the default reset state(for debug purpose) */
 	/* Set HSION bit */
 	RCC->CR |= (uint32_t)0x00000001;
-	
 	/* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
 	RCC->CFGR &= (uint32_t)0xF8FF0000;
-	
 	/* Reset HSEON, CSSON and PLLON bits */
 	RCC->CR &= (uint32_t)0xFEF6FFFF;
-	
 	/* Reset HSEBYP bit */
 	RCC->CR &= (uint32_t)0xFFFBFFFF;
-	
 	/* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE/OTGFSPRE bits */
 	RCC->CFGR &= (uint32_t)0xFF80FFFF;
-	
 	/* Disable all interrupts and clear pending bits  */
 	//RCC->CIR = 0x009F0000;
 	RCC->CIR = 0x00000000;
-    
 	/* config HSI */
 		/* enable HSI */
 		RCC->CR |= 0x00000001;
 		/* wait HSI RDY */
 		while ((RCC->CR & 0x00000002) != 0x00000002);
-
 	/* config PLL */
 		/* set PLL source to HSI/2 */
 		RCC->CFGR &= 0xFFFEFFFF;
-		
 		/* set PLLMUL to x16 */
 		RCC->CFGR |= 0x00380000;
-		
 		/* set PLL ON */
 		RCC->CR |= 0x01000000;
-		
 		/* wait PLL RDY */
 		while ((RCC->CR & 0x02000000) != 0x02000000);
-
 	/* set APB1 prescaler to 2 */
 	RCC->CFGR |= 0x00000400;
-	
 	/* enable prefetch */
 	FLASH->ACR |= 0x00000010;
-	
 	/* set wait 2 cyccle for 64Mhz */
 	FLASH->ACR &= 0xfffffff8;
 	FLASH->ACR |= 0x00000002;
-
 	/* set SYSCLK to PLLCLK */
 	RCC->CFGR &= 0xFFFFFFFC;
 	RCC->CFGR |= 0x00000002;
+}
 
+void SystemInit(void)
+{
+	/* RCC initial to configurate system clock */
+	RCC_init();
  	/*  stm32f103rb nucleo board PD0/MCO pin connect to
 	 *  stm32f103cbt6 jtag ic mco output the freq. is the same
 	 *  to this IC input external oscillator freq.
@@ -70,7 +61,6 @@ void SystemInit(void)
  	/* set MCO to SYSCLK */
  	//RCC->CFGR &= 0xF8FFFFFF;
  	//RCC->CFGR |= 0x04000000;
-
 }
 
 void SwitchToUserMode(void)
@@ -229,16 +219,21 @@ uint8_t first = 1;
 struct task *now_task;
 struct task *task_list;
 
-void create_task(uint32_t *address, void (*start)(void))
+//void create_task(uint32_t *address, void (*start)(void))
+void create_task(void (*start)(void))
 {
 	uint8_t i;
+	uint32_t *address;
 	struct task *t;
 	if (first) {
+		address = (uint32_t *)USER_STACK_START;
 		for (i = 0; i < 9; i++)
 			*(address - i) = 0x0;
 
 		*(address - 1) = (uint32_t)start;		
 		t = (struct task *)kmalloc(sizeof(struct task));
+		t->base = (uint32_t)address;
+		t->size = USER_STACK_SIZE;
 		t->sp = (uint32_t)(address - 9);
 		t->priority = 0;
 		t->next = t;
@@ -246,6 +241,7 @@ void create_task(uint32_t *address, void (*start)(void))
 		task_list = t;
 		first  = 0;
 	} else {
+		address = (uint32_t *)(task_list->prev->base - USER_STACK_SIZE);
 		for (i = 0; i < 17; i++)
 			*(address - i) = 0x0;
 
@@ -253,6 +249,8 @@ void create_task(uint32_t *address, void (*start)(void))
 		*(address - 2) = (uint32_t)start;		
 		*(address - 9) = 0xfffffffd;	/* return to thread mode (LR)*/
 		t = (struct task *)kmalloc(sizeof(struct task));
+		t->base = (uint32_t)address;
+		t->size = USER_STACK_SIZE;
 		t->sp = (uint32_t)(address - 17);
 		task_list->prev->next = t;
 		t->next = task_list;
@@ -270,7 +268,7 @@ void task_show(void)
 	p = task_list;
 	if (p != NULL) {
 		do {
-			kprintf("task %d : sp %x\n", i++, p->sp);
+			kprintf("task %d : base %x\n", i++, p->base);
 			p = p->next; 
 		} while (p != task_list);
 	}
@@ -280,7 +278,6 @@ void task_show(void)
 void thread_start()
 {
 	now_task = task_list;
-
 	/* Save kernel context */
 	asm volatile("mrs ip, psr\t\n");
 	asm volatile("push {r4-r11, ip, lr}\t\n");

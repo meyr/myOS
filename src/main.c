@@ -116,14 +116,14 @@ extern uint8_t enablePendSV;
 int kernel_main(void)
 {
 	MpuInit();
-	initSysTick();
+	interrupt_init();
 	initUART();
 	initLED();
 	initUserBtn();
 	
-	create_task((uint32_t *)(0x20002800), user1_main);
-	create_task((uint32_t *)(0x20002900), user2_main);
-	create_task((uint32_t *)(0x20002a00), user3_main);
+	create_task(user1_main);
+	create_task(user2_main);
+	create_task(user3_main);
 	enablePendSV = 1;
 	thread_start();
 

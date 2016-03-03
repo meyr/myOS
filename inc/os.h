@@ -3,10 +3,14 @@
 #include "stddef.h"
 
 /* os setting */
-#define HEAP_START 0x20002800
-#define MAX_HEAPS 4096
+#define KERNEL_HEAP_START 0x20002800
+#define KERNEL_MAX_HEAPS  4096
+#define USER_STACK_START  0x20002800
+#define USER_STACK_SIZE   0x100
 
 struct task {
+	uint32_t base;
+	uint32_t size;
 	uint32_t sp;
 	uint8_t  priority;
 	struct task *next;
@@ -24,13 +28,13 @@ uint32_t GetSP(void);
 void SetupPSP(uint32_t address);
 void SwitchToUserMode(void);
 int kprintf(const char *format, ...);
-void create_task(uint32_t *address, void (*start)(void));
+void create_task(void (*start)(void));
 void thread_start(void);
 void task_show(void);
 void *kmalloc(unsigned int nbytes);
 void kfree(void *ap);
 /* global function */
-void initSysTick(void);
+void interrupt_init(void);
 void delay(int ms);
 void MpuInit(void);
 /* cmsis */

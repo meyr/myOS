@@ -12,8 +12,8 @@ union header {
 
 typedef union header Header;
 
-static uint8_t *heaps = (uint8_t *)HEAP_START;
-static uint8_t *program_break = (uint8_t *)HEAP_START;
+static uint8_t *heaps = (uint8_t *)KERNEL_HEAP_START;
+static uint8_t *program_break = (uint8_t *)KERNEL_HEAP_START;
 
 static Header base; /* empty list to get started */
 static Header *freep = NULL; /* start of free list */
@@ -23,7 +23,7 @@ static void *sbrk(unsigned int nbytes)
 	uint8_t *previous_pb;
 
 	if (program_break + nbytes >= heaps
-	    && program_break + nbytes < heaps + MAX_HEAPS) {
+	    && program_break + nbytes < heaps + KERNEL_MAX_HEAPS) {
 		previous_pb = program_break;
 		program_break += nbytes;
 		return (void *) previous_pb;

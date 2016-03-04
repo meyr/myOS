@@ -58,7 +58,7 @@ void EXTI15_10_IRQHandler(void)
 	EXTI->PR = 0x00002000;
 
 	/* can triggle svc in interrupt mode */
-	kprintf("[%d] btn push!\r\n",uwTick);
+	printk("[%d] btn push!\r\n",uwTick);
 }
 
 

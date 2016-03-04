@@ -3,14 +3,20 @@
 #define svc(code) asm volatile ("svc %[immediate]"::[immediate] "I" (code))
 #define SVC_WRITE_STRING 7
 
-int _write_data(const char *s)
+void __serial_putc(const char c)
 {
-        while (*s) {
-                while ((USART1->SR & 0x00000080) != 0x00000080);
-	        USART1->DR = (*s & 0xFF);
-                s++;
-        }
-	return 1;
+	while ((USART1->SR & 0x00000080) != 0x00000080);
+		USART1->DR = (c & 0xFF);
+
+	/* If \n, also do \r */
+	if (c == '\n')
+		__serial_putc('\r');
+}
+
+void __serial_puts(const char *s)
+{
+        while (*s)
+		__serial_putc (*s++);
 }
 
 void svc_handler_c(unsigned int *svc_args)
@@ -24,7 +30,8 @@ void svc_handler_c(unsigned int *svc_args)
 	//svc_r1 = ((unsigned long) svc_args[1]);
 	switch (svc_number) {
 		case SVC_WRITE_STRING :
-			svc_args[0] = _write_data((const char *)svc_r0);						
+			//svc_args[0] = __serial_puts((const char *)svc_r0);						
+			__serial_puts((const char *)svc_r0);						
 			break;
 		default :
 			break;

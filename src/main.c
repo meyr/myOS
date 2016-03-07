@@ -113,14 +113,22 @@ void user3_main(void)
 }
 
 extern uint8_t enablePendSV;
+static init_func init[]={
+        MpuInit,
+	interrupt_init,
+	initUART,
+	initLED,
+	initUserBtn,
+	        0,
+};
+
 int kernel_main(void)
 {
-	MpuInit();
-	interrupt_init();
-	initUART();
-	initLED();
-	initUserBtn();
-	
+	uint8_t i;
+	/* initial submodule */
+	for ( i = 0; init[i]; i++)
+		init[i]();
+					
 	create_task(user1_main);
 	create_task(user2_main);
 	create_task(user3_main);

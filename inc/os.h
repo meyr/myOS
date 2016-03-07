@@ -19,8 +19,8 @@ struct task {
 
 
 /* global variable */
-
-extern __IO uint32_t uwTick;
+typedef void (*init_func)(void);
+extern uint32_t uwTick;
 
 /* kernel */
 uint32_t GetPSP(void);

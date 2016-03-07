@@ -241,7 +241,7 @@ void static __serial_puts(const char *s)
 }
 
 
-void static __print(unsigned char mode, const char *fmt, ...)
+void printk(const char *fmt, ...)
 {
 	va_list args;
 	char print_buf[64];
@@ -250,8 +250,17 @@ void static __print(unsigned char mode, const char *fmt, ...)
 	vsnprintf (print_buf, sizeof(print_buf),fmt, args);
 	va_end (args);
 
-	if (mode == PRINT_KERNEL_MODE)
-		__serial_puts(print_buf);
-	else
-		svc_call_write_string(&print_buf[0]);
+	__serial_puts(print_buf);
+}
+
+void printf(const char *fmt, ...)
+{
+	va_list args;
+	char print_buf[64];
+
+	va_start (args, fmt);
+	vsnprintf (print_buf, sizeof(print_buf),fmt, args);
+	va_end (args);
+
+	svc_call_write_string(print_buf);
 }

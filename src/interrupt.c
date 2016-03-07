@@ -3,7 +3,7 @@
 
 extern struct task *now_task;
 uint8_t enablePendSV;
-__IO uint32_t uwTick;
+uint32_t uwTick;
 
 void NVIC_SetPriorityGrouping(uint32_t PriorityGroup)
 {

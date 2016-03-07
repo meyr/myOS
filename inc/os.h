@@ -5,7 +5,7 @@
 /* os setting */
 #define KERNEL_HEAP_START 0x20002800
 #define KERNEL_MAX_HEAPS  4096
-#define USER_STACK_START  0x20002800
+#define USER_STACK_START  KERNEL_HEAP_START
 #define USER_STACK_SIZE   0x100
 
 struct task {
@@ -19,15 +19,15 @@ struct task {
 
 
 /* global variable */
-
-extern __IO uint32_t uwTick;
+typedef void (*init_func)(void);
+extern uint32_t uwTick;
 
 /* kernel */
 uint32_t GetPSP(void);
 uint32_t GetSP(void);
 void SetupPSP(uint32_t address);
 void SwitchToUserMode(void);
-int kprintf(const char *format, ...);
+void printk(const char *format, ...);
 void create_task(void (*start)(void));
 void thread_start(void);
 void task_show(void);
@@ -50,7 +50,7 @@ void pwr_stopRon(void);
 void pwr_stopRlow(void);
 /* libc */
 unsigned int strlen(char *str);
-int printf(const char *format, ...);
+void printf(const char *format, ...);
 void memcpy(uint8_t *dest, uint8_t *src, uint32_t size);
 char *itoa(int n, char *str, int radix);
 /* svc */
